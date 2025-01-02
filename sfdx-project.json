@@ -3,10 +3,21 @@
     {
       "path": "force-app",
       "default": true
+    },
+    {
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "path": "force-app/main/default",
+      "default": false,
+      "package": "pv-resume-builder",
+      "versionDescription": ""
     }
   ],
   "name": "lwc-resume-builder",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "62.0"
+  "sourceApiVersion": "62.0",
+  "packageAliases": {
+    "pv-resume-builder": "0Hobm0000000E6DCAU"
+  }
 }
