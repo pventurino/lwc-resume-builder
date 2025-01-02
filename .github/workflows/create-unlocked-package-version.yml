@@ -13,30 +13,41 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Salesforce CLI
-        uses: salesforcecli/sfdx-github-action@v2
+      - name: Install Salesforce CLI
+        uses: patrykacc/sf-cli-setup@v1.1.0
 
       - name: Authenticate with Dev Hub
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
         run: |
           echo "Authenticating with Dev Hub..."
-          sfdx auth:sfdxurl:store -f $SFDX_AUTH_URL -a DevHub
+          echo "$SFDX_AUTH_URL" | sf auth sfdxurl store -a DevHub -u
 
       - name: Create Package Version
+        id: create-package-version
         run: |
           echo "Creating unlocked package version..."
-          PACKAGE_ID=$(sfdx force:package:version:create -p "pv-resume-builder" -d force-app -w 10 -c --json | jq -r '.result.SubscriberPackageVersionId')
-          echo "Package version created with ID: $PACKAGE_ID"
+          sf package version create -p "pv-resume-builder" -v DevHub -d force-app -x -w 10 -c --json | tee result.json | jq .
+          STATUS=$(jq -r '.status' result.json)
+          if [ "$STATUS" eq "0" ] ; then
+            PACKAGE_ID=$(jq -r '.result.SubscriberPackageVersionId' result.json)
+            echo "Package version created with ID: $PACKAGE_ID"
+            echo "PACKAGE_ID=${PACKAGE_ID}" >> $GITHUB_OUTPUT
+          fi
+          exit ${STATUS}
 
       - name: Output Package Details
+        env:
+          PACKAGE_ID: ${{ steps.create-package-version.outputs.PACKAGE_ID }}
         run: |
           echo "Retrieving package details..."
-          sfdx force:package:version:report -p $PACKAGE_ID
+          sf package version report -p $PACKAGE_ID -v DevHub
 
       - name: Post Result to Pull Request
         if: success()
         uses: thollander/actions-comment-pull-request@v2
+        env:
+          PACKAGE_ID: ${{ steps.create-package-version.outputs.PACKAGE_ID }}
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |

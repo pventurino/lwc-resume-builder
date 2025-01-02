@@ -1,0 +1,14 @@
+{
+  "name": "MultipleErrorsError",
+  "message": "Multiple errors occurred: \n(1) Resume__c.Location__c: Invalid data type.\n(2) Build_Resumes: In field: field - no CustomField named Resume__c.Location__c found\n(3) Resume_Record_Page: Something went wrong. We couldn't retrieve or load the information on the field: Record.Location__c.",
+  "exitCode": 1,
+  "context": "PackageVersionCreateCommand",
+  "stack": "MultipleErrorsError: Multiple errors occurred: \n(1) Resume__c.Location__c: Invalid data type.\n(2) Build_Resumes: In field: field - no CustomField named Resume__c.Location__c found\n(3) Resume_Record_Page: Something went wrong. We couldn't retrieve or load the information on the field: Record.Location__c.\n    at SfCommandError.from (file:///home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/node_modules/@salesforce/sf-plugins-core/lib/SfCommandError.js:39:16)\n    at PackageVersionCreateCommand.catch (file:///home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/node_modules/@salesforce/sf-plugins-core/lib/sfCommand.js:316:47)\n    at PackageVersionCreateCommand._run (/home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/node_modules/@oclif/core/lib/command.js:316:29)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Config.runCommand (/home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/node_modules/@oclif/core/lib/config/config.js:435:25)\n    at async run (/home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/node_modules/@oclif/core/lib/main.js:95:16)\n    at async file:///home/pablo/.nvm/versions/node/v20.18.0/lib/node_modules/@salesforce/cli/bin/run.js:15:1",
+  "cause": "undefined",
+  "warnings": [
+    "Starting in v59.0 or later, specifying both the --package and --path flag will no longer be supported. Only one is required."
+  ],
+  "code": "MultipleErrorsError",
+  "status": 1,
+  "commandName": "PackageVersionCreateCommand"
+}
