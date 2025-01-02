@@ -1,0 +1,44 @@
+name: Create Salesforce Unlocked Package Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-package-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Salesforce CLI
+        uses: salesforcecli/sfdx-github-action@v2
+
+      - name: Authenticate with Dev Hub
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+        run: |
+          echo "Authenticating with Dev Hub..."
+          sfdx auth:sfdxurl:store -f $SFDX_AUTH_URL -a DevHub
+
+      - name: Create Package Version
+        run: |
+          echo "Creating unlocked package version..."
+          PACKAGE_ID=$(sfdx force:package:version:create -p "pv-resume-builder" -d force-app -w 10 -c --json | jq -r '.result.SubscriberPackageVersionId')
+          echo "Package version created with ID: $PACKAGE_ID"
+
+      - name: Output Package Details
+        run: |
+          echo "Retrieving package details..."
+          sfdx force:package:version:report -p $PACKAGE_ID
+
+      - name: Post Result to Pull Request
+        if: success()
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            Successfully created Salesforce unlocked package version.
+            Package ID: $PACKAGE_ID
