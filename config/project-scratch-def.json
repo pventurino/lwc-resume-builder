@@ -1,8 +1,11 @@
 {
   "orgName": "pablo company",
   "edition": "Developer",
-  "features": ["EnableSetPasswordInApi"],
+  "features": ["EnableSetPasswordInApi", "StateAndCountryPicklist"],
   "settings": {
+    "customAddressFieldSettings": {
+      "enableCustomAddressField": true
+    },
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
     },
