@@ -17,6 +17,7 @@ runs:
       uses: patrykacc/sf-cli-setup@v1.1.0
 
     - name: Authenticate with Dev Hub
+      shell: bash
       run: |
         echo "Authenticating with Dev Hub..."
         echo "${{ inputs.SFDX_AUTH_URL }}" | sf auth sfdxurl store \
