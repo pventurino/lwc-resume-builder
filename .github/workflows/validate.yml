@@ -1,0 +1,70 @@
+name: Checkonly Deploy and Test
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  TEST_ORG_ALIAS: testorg
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Salesforce CLI
+        uses: ./.github/actions/setup-salesforce-cli
+        with:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+
+      - name: Connect existing test org
+        id: connect-existing-test-org
+        continue-on-error: true
+        env:
+          VALIDATE_ORG_AUTH_URL: ${{ secrets.VALIDATE_ORG_AUTH_URL }}
+        run: |
+          echo "$VALIDATE_ORG_AUTH_URL" | sf auth sfdxurl store \
+            --alias ${{ env.TEST_ORG_ALIAS }} \
+            --set-default \
+            --sfdx-url-stdin
+
+      - name: Create new test org
+        id: create-new-test-org
+        if: steps.connect-existing-test-org.outcome == 'failure'
+        run: |
+          sf org create scratch \
+            --alias ${{ env.TEST_ORG_ALIAS }} \
+            --name "GitHub Actions - Validate" \
+            --wait 10 \
+            --duration-days 1 \
+            --definition-file config/project-scratch-def.json \
+            --set-default
+          TEST_ORG_AUTH_URL=$(sf org display \
+            -o ${{ env.TEST_ORG_ALIAS }} \
+            --verbose \
+            --json | jq -r '.result.sfdxAuthUrl')
+          echo "TEST_ORG_AUTH_URL=${TEST_ORG_AUTH_URL}" >> $GITHUB_OUTPUT
+
+      - name: what's the new test org URL?
+        run: |
+          echo "the new auth URL is ${{ steps.create-new-test-org.outputs.TEST_ORG_AUTH_URL }}"
+          echo "the old auth URL is ${{ secrets.VALIDATE_ORG_AUTH_URL }}"
+
+      - name: Store test org auth url
+        if: steps.create-new-test-org.outcome == 'success'
+        uses: gliech/create-github-secret-action@v1
+        with:
+          name: VALIDATE_ORG_AUTH_URL
+          value: "${{ steps.create-new-test-org.outputs.TEST_ORG_AUTH_URL }}"
+          pa_token: "${{ secrets.PA_TOKEN_WRITE_SECRETS }}"
+
+      - name: Validate deployment
+        run: |
+          sf project deploy validate \
+            --wait 90 \
+            --source-dir force-app

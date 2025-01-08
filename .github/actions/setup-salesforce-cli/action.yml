@@ -1,0 +1,26 @@
+name: Setup Salesforce CLI
+# on:
+#   workflow_call
+
+# jobs:
+#   setup-salesforce-cli:
+#     runs-on: ubuntu-latest
+inputs:
+  SFDX_AUTH_URL:
+    description: Sfdx Auth Url
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Salesforce CLI
+      uses: patrykacc/sf-cli-setup@v1.1.0
+
+    - name: Authenticate with Dev Hub
+      shell: bash
+      run: |
+        echo "Authenticating with Dev Hub..."
+        echo "${{ inputs.SFDX_AUTH_URL }}" | sf auth sfdxurl store \
+          --alias DevHub \
+          --set-default-dev-hub \
+          --sfdx-url-stdin
